@@ -861,6 +861,22 @@
         function downloadPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+
+            const drawWrappedMetaRow = ({ label, value, labelX, valueX, y, valueWidth, lineHeight }) => {
+                const wrappedValueLines = doc.splitTextToSize(value || '-', valueWidth);
+
+                doc.setTextColor(102, 126, 234);
+                doc.setFont('helvetica', 'bold');
+                doc.text(label, labelX, y);
+
+                doc.setTextColor(50, 50, 50);
+                doc.setFont('helvetica', 'normal');
+                wrappedValueLines.forEach((line, index) => {
+                    doc.text(line, valueX, y + (index * lineHeight), { align: 'right' });
+                });
+
+                return wrappedValueLines.length;
+            };
             
             const vendorName = document.getElementById('vendorName').value;
             const vendorAddress = document.getElementById('vendorAddress').value;
@@ -926,21 +942,30 @@
             doc.setFont('helvetica', 'bold');
             doc.text('INVOICE', 195, 20, { align: 'right' });
 
-            // Invoice Meta (Right side)
+            // Invoice Meta (Right side) - wraps long values to avoid overlap
             doc.setFontSize(10);
-            doc.setTextColor(102, 126, 234);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Invoice #', 150, 32);
-            doc.text('Invoice Date', 150, 39);
-            doc.text('Ref. PO', 150, 46);
-            doc.text('Currency', 150, 53);
+            const metaRows = [
+                { label: 'Invoice #', value: invoiceNumber },
+                { label: 'Invoice Date', value: invoiceDate },
+                { label: 'Ref. PO', value: refPo },
+                { label: 'Currency', value: currency }
+            ];
 
-            doc.setTextColor(50, 50, 50);
-            doc.setFont('helvetica', 'normal');
-            doc.text(invoiceNumber, 195, 32, { align: 'right' });
-            doc.text(invoiceDate, 195, 39, { align: 'right' });
-            doc.text(refPo, 195, 46, { align: 'right' });
-            doc.text(currency, 195, 53, { align: 'right' });
+            let metaY = 32;
+            const metaLineHeight = 5;
+            metaRows.forEach((row) => {
+                const usedLines = drawWrappedMetaRow({
+                    label: row.label,
+                    value: row.value,
+                    labelX: 145,
+                    valueX: 195,
+                    y: metaY,
+                    valueWidth: 40,
+                    lineHeight: metaLineHeight
+                });
+
+                metaY += Math.max(usedLines, 1) * metaLineHeight + 2;
+            });
 
             // Bill To Section
             doc.setFontSize(10);
