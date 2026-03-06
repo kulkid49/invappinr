@@ -872,7 +872,7 @@
                 doc.setTextColor(50, 50, 50);
                 doc.setFont('helvetica', 'normal');
                 wrappedValueLines.forEach((line, index) => {
-                    doc.text(line, valueX, y + (index * lineHeight), { align: 'right' });
+                    doc.text(line, valueX, y + (index * lineHeight));
                 });
 
                 return wrappedValueLines.length;
@@ -957,10 +957,10 @@
                 const usedLines = drawWrappedMetaRow({
                     label: row.label,
                     value: row.value,
-                    labelX: 145,
-                    valueX: 195,
+                    labelX: 130,
+                    valueX: 160,
                     y: metaY,
-                    valueWidth: 40,
+                    valueWidth: 35,
                     lineHeight: metaLineHeight
                 });
 
